@@ -1,6 +1,6 @@
-# .NET Sqlite Insert Benchmarking   
+# ADO.NET Sqlite Insert Benchmarking   
 
-Purpose of this project is to show different approaches for inserting huge number of rows into Sqlite database using ADO.NET provider.
+Purpose of this project is to show different approaches for inserting huge number of rows into Sqlite database using [ADO.NET](https://docs.microsoft.com/en-us/dotnet/standard/data/sqlite/?tabs=netcore-cli) provider.
 
 Default approach where each insert is packed in its own transaction has a bad performance and that was the motivation to explore different approaches and measure 
 which one has the best performance. Every approach has its own repository class and can be tested individually.
