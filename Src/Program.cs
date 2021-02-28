@@ -1,5 +1,6 @@
 ﻿using Sqlite.Benchmarking.Repositories;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -14,7 +15,7 @@ namespace Sqlite.Benchmarking
         {
             var outputDirectory = Environment.CurrentDirectory;
             var sampleSizes = new int[] { 1, 10, 100, 1000, 10000, 100000 };
-            var results = new List<(string RepositoryName, int SampleSize, TimeSpan elapsedTime)>();
+            var results = new ConcurrentBag<(string RepositoryName, int SampleSize, TimeSpan elapsedTime)>();
 
             Console.WriteLine("***** TESTING SQLite INSERT PERFORMANCE ******");
             Console.WriteLine(Environment.NewLine);
