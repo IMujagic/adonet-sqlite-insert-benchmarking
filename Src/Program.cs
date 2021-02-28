@@ -43,8 +43,6 @@ namespace Sqlite.Benchmarking
                     }));
             }
 
-            Console.WriteLine("Test finished....");
-
             foreach(var resultGroup in results.GroupBy(x => x.SampleSize))
             {
                 Console.WriteLine(Environment.NewLine);
@@ -58,6 +56,8 @@ namespace Sqlite.Benchmarking
                         $"was running for {groupResult.elapsedTime.Minutes}m {groupResult.elapsedTime.Seconds}s {groupResult.elapsedTime.Milliseconds}ms");
                 }
             };
+
+            Console.WriteLine("Test finished");
         }
 
         private static TimeSpan Run(IRepository repository, IEnumerable<SampleDataModel> data)
