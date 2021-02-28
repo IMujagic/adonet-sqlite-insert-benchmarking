@@ -13,8 +13,8 @@ namespace Sqlite.Benchmarking
         static void Main(string[] args)
         {
             var outputDirectory = Environment.CurrentDirectory;
-            var sampleSizes = new int[] { 1, 10, 100, 1000 };
-            var results = new List<(string RepositoryName, int SampleSize, double elapsedTime)>();
+            var sampleSizes = new int[] { 1, 10, 100, 1000, 10000, 100000 };
+            var results = new List<(string RepositoryName, int SampleSize, TimeSpan elapsedTime)>();
 
             Console.WriteLine("***** TESTING SQLite INSERT PERFORMANCE ******");
             Console.WriteLine(Environment.NewLine);
@@ -23,7 +23,7 @@ namespace Sqlite.Benchmarking
             {
                 var sampleData = SampleDataModel.Generate(sampleSize);
 
-                Console.WriteLine($"Running insert for {sampleData.Count} items.");
+                Console.WriteLine($"Running test for {sampleData.Count} items.");
 
                 Task.WaitAll(
                     Task.Run(() =>
@@ -50,14 +50,17 @@ namespace Sqlite.Benchmarking
                 Console.WriteLine(Environment.NewLine);
                 Console.WriteLine($"Result for sample size: {resultGroup.Key}");
 
-                foreach(var groupResult in resultGroup.OrderBy(x => x.elapsedTime))
+                foreach(var groupResult in resultGroup.OrderBy(x => x.elapsedTime.TotalMilliseconds))
                 {
-                    Console.WriteLine($"Approach {groupResult.RepositoryName} for sample size {groupResult.SampleSize} was running for {groupResult.elapsedTime} seconds.");
+                    Console.WriteLine($"" +
+                        $"Approach {groupResult.RepositoryName} " +
+                        $"for sample size {groupResult.SampleSize} " +
+                        $"was running for {groupResult.elapsedTime.Minutes}m {groupResult.elapsedTime.Seconds}s {groupResult.elapsedTime.Milliseconds}ms");
                 }
             };
         }
 
-        private static double Run(IRepository repository, IEnumerable<SampleDataModel> data)
+        private static TimeSpan Run(IRepository repository, IEnumerable<SampleDataModel> data)
         {
             var sp = new Stopwatch();
             sp.Start();
@@ -66,7 +69,7 @@ namespace Sqlite.Benchmarking
 
             sp.Stop();
 
-            return sp.Elapsed.TotalSeconds;
+            return sp.Elapsed;
         }
     }
 }
