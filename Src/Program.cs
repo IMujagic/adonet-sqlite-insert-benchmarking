@@ -10,29 +10,46 @@ namespace Sqlite.Benchmarking
 {
     class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
-            Console.WriteLine("***** TESTING SQLite PERFORMANCE ******");
+            var outputDirectory = Environment.CurrentDirectory;
+            var sampleSizes = new int[] { 1, 10, 100, 1000 };
+            var results = new List<(string RepositoryName, int SampleSize, double elapsedTime)>();
 
-            var sampleData = SampleDataModel.Generate(1000);
+            Console.WriteLine("***** TESTING SQLite INSERT PERFORMANCE ******");
+            Console.WriteLine(Environment.NewLine);
             
-            Console.WriteLine($"Running insert for {sampleData.Count} items.");
-
-            var t1 = Task.Run(() =>
+            foreach(var sampleSize in sampleSizes)
             {
-                Console.WriteLine("Start test without transaction.");
-                Console.WriteLine($"Elapsed time for default approach: {Run(new RepositoryWithoutTransaction(Path.Combine(Environment.CurrentDirectory, "SqliteBenchmark.sqlite")), sampleData)} seconds.");
-            });
+                var sampleData = SampleDataModel.Generate(sampleSize);
 
-            var t2 = Task.Run(() =>
+                Console.WriteLine($"Running insert for {sampleData.Count} items.");
+
+                Task.WaitAll(
+                    Task.Run(() =>
+                    {
+                        var elapsedTime = Run(new RepositoryWithoutTransaction(Path.Combine(outputDirectory, "SqliteBenchmarkDefault.sqlite")), sampleData);
+                        results.Add((nameof(RepositoryWithoutTransaction), sampleSize, elapsedTime));
+                    }),
+                    Task.Run(() =>
+                    {
+                        var elapsedTime = Run(new RepositoryWithTransaction(Path.Combine(outputDirectory, "SqliteBenchmarkWTransaction.sqlite")), sampleData);
+                        results.Add((nameof(RepositoryWithTransaction), sampleSize, elapsedTime));
+                    }));
+            }
+
+            Console.WriteLine("Test finished....");
+
+            foreach(var resultGroup in results.GroupBy(x => x.SampleSize))
             {
-                Console.WriteLine("Start test with transaction.");
-                Console.WriteLine($"Elapsed time for transaction approach: {Run(new RepositoryWithTransaction(Path.Combine(Environment.CurrentDirectory, "SqliteBenchmark2.sqlite")), sampleData)} seconds.");
-            });
+                Console.WriteLine(Environment.NewLine);
+                Console.WriteLine($"Result for sample size: {resultGroup.Key}");
 
-            Task.WaitAll(t1, t2);
-
-            Console.WriteLine("Test finished");
+                foreach(var groupResult in resultGroup.OrderBy(x => x.elapsedTime))
+                {
+                    Console.WriteLine($"Approach {groupResult.RepositoryName} for sample size {groupResult.SampleSize} was running for {groupResult.elapsedTime} seconds.");
+                }
+            };
         }
 
         private static double Run(IRepository repository, IEnumerable<SampleDataModel> data)
