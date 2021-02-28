@@ -35,6 +35,11 @@ namespace Sqlite.Benchmarking
                     {
                         var elapsedTime = Run(new RepositoryWithTransaction(Path.Combine(outputDirectory, "SqliteBenchmarkWTransaction.sqlite")), sampleData);
                         results.Add((nameof(RepositoryWithTransaction), sampleSize, elapsedTime));
+                    }),
+                    Task.Run(() =>
+                    {
+                        var elapsedTime = Run(new RepositoryWithTransactionReusedCommand(Path.Combine(outputDirectory, "SqliteBenchmarkWTransactionReusedCommand.sqlite")), sampleData);
+                        results.Add((nameof(RepositoryWithTransactionReusedCommand), sampleSize, elapsedTime));
                     }));
             }
 
